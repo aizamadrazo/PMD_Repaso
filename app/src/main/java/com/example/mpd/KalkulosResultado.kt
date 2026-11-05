@@ -1,5 +1,9 @@
+
 package com.example.mpd
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,7 +12,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-//traemos al svarivales de l otro also on volver apra ir a la otra apntalla
+
+class ResultadoActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Recibimos los datos que nos manda la otra Activity
+        val precio = intent.getDoubleExtra("precio", 0.0)
+        val descuento = intent.getIntExtra("descuento", 0)
+        val importeDescuento = intent.getDoubleExtra("importeDescuento", 0.0)
+        val precioFinal = intent.getDoubleExtra("precioFinal", 0.0)
+        val desglose = intent.getStringExtra("desglose") ?: ""
+
+        setContent {
+            MaterialTheme {
+                PantallaResultado(
+                    precio = precio,
+                    descuento = descuento,
+                    importeDescuento = importeDescuento,
+                    precioFinal = precioFinal,
+                    desglose = desglose,
+                    onVolver = {
+                        finish()
+                    }
+                )
+            }
+        }
+    }
+}
+
+//traemos las variables de la otra Activity
 @Composable
 fun PantallaResultado(
     precio: Double,
@@ -37,12 +71,10 @@ fun PantallaResultado(
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-
                 Text(
                     "Precio original: ${"%.2f".format(precio)} €"
                 )
@@ -67,17 +99,16 @@ fun PantallaResultado(
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-
                 Text(
                     "Desglose",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+
                 //si no ets bacio
                 if (desglose.isNotBlank()) {
 

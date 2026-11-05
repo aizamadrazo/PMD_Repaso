@@ -1,5 +1,7 @@
+
 package com.example.mpd
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -55,15 +57,6 @@ fun PantallaDescuento() {
     var pago by remember { mutableStateOf(pagos[0]) }
     var repetidor by remember { mutableStateOf(false) }
 
-    // ESTADOS PARA LA PANTALLA DE RESULTADO
-    var mostrarResultado by remember { mutableStateOf(false) }
-    //despues de los cambios
-    var precioCalculado by remember { mutableStateOf(0.0) }
-    var descuentoCalculado by remember { mutableStateOf(0) }
-    var importeCalculado by remember { mutableStateOf(0.0) }
-    var precioFinalCalculado by remember { mutableStateOf(0.0) }
-    var desgloseCalculado by remember { mutableStateOf("") }
-
     // FUNCIÓN PARA CALCULAR EL DESCUENTO
     fun calcular() {
         //par auqe coag comoas y punto
@@ -111,158 +104,140 @@ fun PantallaDescuento() {
         val precioFinal = p - importeDescuento
 
         // Guardamos los resultados
-        precioCalculado = p
-        descuentoCalculado = descuento
-        importeCalculado = importeDescuento
-        precioFinalCalculado = precioFinal
-        desgloseCalculado = desglose.joinToString("\n")
+        // Ahora enviamos los resultados a la otra Activity mediante Intent
 
-        // Mostramos la pantalla de resultado
-        mostrarResultado = true
+        /*Intet usar ao rapasr datso*/
+
+        val intent = Intent(context, ResultadoActivity::class.java)
+
+        intent.putExtra("precio", p)
+        intent.putExtra("descuento", descuento)
+        intent.putExtra("importeDescuento", importeDescuento)
+        intent.putExtra("precioFinal", precioFinal)
+        intent.putExtra("desglose", desglose.joinToString("\n"))
+
+        context.startActivity(intent)
     }
 
-    // NAVEGACIÓN ENTRE LAS DOS PANTALLAS
-    if (mostrarResultado) {
+    // PANTALLA PRINCIPAL
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
 
-        PantallaResultado(
-            precio = precioCalculado,
-            descuento = descuentoCalculado,
-            importeDescuento = importeCalculado,
-            precioFinal = precioFinalCalculado,
-            desglose = desgloseCalculado,
-            onVolver = {
-                mostrarResultado = false
-            }
+        Text(
+            "Calculadora de descuento",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
         )
 
-    } else {
+        // PRECIO
+        OutlinedTextField(
+            value = precio,
+            onValueChange = {
+                precio = it.filter { c ->
+                    c.isDigit() || c == '.' || c == ','
+                }
+            },
+            label = {
+                Text("Precio (€)")
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        // PANTALLA PRINCIPAL
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        // CATEGORÍA
+        ExposedDropdownMenuBox(
+            expanded = menuAbierto,
+            onExpandedChange = {
+                menuAbierto = it
+            }
         ) {
-
-            Text(
-                "Calculadora de descuento",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            // PRECIO
             OutlinedTextField(
-                value = precio,
-                onValueChange = {
-                    precio = it.filter { c ->
-                        c.isDigit() || c == '.' || c == ','
-                    }
-                },
+                value = categoria.first,
+                onValueChange = {},
+                readOnly = true,
                 label = {
-                    Text("Precio (€)")
+                    Text("Categoría")
                 },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal
-                ),
-                modifier = Modifier.fillMaxWidth()
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = menuAbierto
+                    )
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
             )
 
-            // CATEGORÍA
-            ExposedDropdownMenuBox(
+            ExposedDropdownMenu(
                 expanded = menuAbierto,
-                onExpandedChange = {
-                    menuAbierto = it
+                onDismissRequest = {
+                    menuAbierto = false
                 }
             ) {
-
-                OutlinedTextField(
-                    value = categoria.first,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = {
-                        Text("Categoría")
-                    },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = menuAbierto
-                        )
-                    },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = menuAbierto,
-                    onDismissRequest = {
-                        menuAbierto = false
-                    }
-                ) {
-
-                    categorias.forEach { opcion ->
-
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    "${opcion.first} (+${opcion.second}%)"
-                                )
-                            },
-                            onClick = {
-                                categoria = opcion
-                                menuAbierto = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // FORMA DE PAGO
-            Text("Forma de pago")
-
-            pagos.forEach { opcion ->
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    RadioButton(
-                        selected = pago == opcion,
+                categorias.forEach { opcion ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                "${opcion.first} (+${opcion.second}%)"
+                            )
+                        },
                         onClick = {
-                            pago = opcion
+                            categoria = opcion
+                            menuAbierto = false
                         }
                     )
-
-                    Text("${opcion.first} (+${opcion.second}%)")
                 }
             }
+        }
 
-            // CHECKBOX
+        // FORMA DE PAGO
+        Text("Forma de pago")
+
+        pagos.forEach { opcion ->
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Checkbox(
-                    checked = repetidor,
-                    onCheckedChange = {
-                        repetidor = it
+                RadioButton(
+                    selected = pago == opcion,
+                    onClick = {
+                        pago = opcion
                     }
                 )
 
-                Text("No repetidor (+5%)")
+                Text("${opcion.first} (+${opcion.second}%)")
             }
+        }
 
-            // BOTÓN RESULTADO
-            Button(
-                onClick = {
-                    calcular()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Resultado")
-            }
+        // CHECKBOX
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = repetidor,
+                onCheckedChange = {
+                    repetidor = it
+                }
+            )
+
+            Text("No repetidor (+5%)")
+        }
+
+        // BOTÓN RESULTADO
+        Button(
+            onClick = {
+                calcular()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Resultado")
         }
     }
 }

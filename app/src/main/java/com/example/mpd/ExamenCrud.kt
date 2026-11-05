@@ -38,7 +38,7 @@ fun PantallaAlumnos() {
 
     // ---------- DATOS ----------
     //la lisat de alumnos con alumanos ya creados y los nuevos
-    val alumnos: SnapshotStateList<Alumno> = remember {
+    val alumnos = remember {
         // Datos de ejemplo para probar los filtros
         mutableStateListOf(
             Alumno("Ane", 18, "1º DAM", false, "Mañana"),
