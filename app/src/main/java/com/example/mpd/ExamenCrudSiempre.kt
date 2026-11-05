@@ -37,7 +37,7 @@ fun PantallaAlumnosSiempre() {
     val context = LocalContext.current
 
     // ---------- DATOS ----------
-    val alumnos: SnapshotStateList<Alumno> = remember {
+    val alumnos = remember {
         // Datos de ejemplo para probar los filtros
         mutableStateListOf(
             Alumno("Ane", 18, "1º DAM", false, "Mañana"),
@@ -48,6 +48,11 @@ fun PantallaAlumnosSiempre() {
             Alumno("Unai", 40, "1º DAW", true, "Tarde")
         )
     }
+    /*lista sin datso
+    val alumnos = remember {
+        mutableStateListOf<Alumno>()
+    }
+    */
     val cursos = listOf("1º DAM", "2º DAM", "1º DAW", "2º DAW")
     val turnos = listOf("Mañana", "Tarde")
 
